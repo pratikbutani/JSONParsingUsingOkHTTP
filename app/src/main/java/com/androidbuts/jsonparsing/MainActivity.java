@@ -13,10 +13,11 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.androidbuts.jsonparsing.adapter.MyArrayAdapter;
+import com.androidbuts.jsonparsing.model.MyDataModel;
 import com.androidbuts.jsonparsing.parser.JSONParser;
 import com.androidbuts.jsonparsing.utils.InternetConnection;
 import com.androidbuts.jsonparsing.utils.Keys;
@@ -30,8 +31,8 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     private ListView listView;
-    private ArrayList<String> list;
-    private ArrayAdapter<String> adapter;
+    private ArrayList<MyDataModel> list;
+    private MyArrayAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         /**
          * Binding that List to Adapter
          */
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, android.R.id.text1, list);
+        adapter = new MyArrayAdapter(this, list);
 
         /**
          * Getting List and Setting List Adapter
@@ -58,22 +59,21 @@ public class MainActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Snackbar.make(findViewById(R.id.parentLayout), list.get(position), Snackbar.LENGTH_LONG).show();
+                Snackbar.make(findViewById(R.id.parentLayout), list.get(position).getName() + " => " + list.get(position).getPhone(), Snackbar.LENGTH_LONG).show();
             }
         });
 
+        /**
+         * Just to know onClick and Printing Hello Toast in Center.
+         */
+        Toast toast = Toast.makeText(getApplicationContext(), "Click on FloatingActionButton to Load JSON", Toast.LENGTH_LONG);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.show();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(@NonNull View view) {
-
-                /**
-                 * Just to know onClick and Printing Hello Toast in Center.
-                 */
-                Toast toast = Toast.makeText(getApplicationContext(), "Hello in Center", Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.CENTER,0,0);
-                toast.show();
 
                 /**
                  * Checking Internet Connection
@@ -135,6 +135,14 @@ public class MainActivity extends AppCompatActivity {
                         int lenArray = array.length();
                         if(lenArray > 0) {
                             for(int jIndex = 0; jIndex < lenArray; jIndex++) {
+
+                                /**
+                                 * Creating Every time New Object
+                                 * and
+                                 * Adding into List
+                                 */
+                                MyDataModel model = new MyDataModel();
+
                                 /**
                                  * Getting Inner Object from contacts array...
                                  * and
@@ -143,6 +151,8 @@ public class MainActivity extends AppCompatActivity {
                                  */
                                 JSONObject innerObject = array.getJSONObject(jIndex);
                                 String name = innerObject.getString(Keys.KEY_NAME);
+                                String email = innerObject.getString(Keys.KEY_EMAIL);
+                                String image = innerObject.getString(Keys.KEY_PROFILE_PIC);
 
                                 /**
                                  * Getting Object from Object "phone"
@@ -150,10 +160,15 @@ public class MainActivity extends AppCompatActivity {
                                 JSONObject phoneObject = innerObject.getJSONObject(Keys.KEY_PHONE);
                                 String phone = phoneObject.getString(Keys.KEY_MOBILE);
 
+                                model.setName(name);
+                                model.setEmail(email);
+                                model.setPhone(phone);
+                                model.setImage(image);
+
                                 /**
                                  * Adding name and phone concatenation in List...
                                  */
-                                list.add(name + " - " + phone);
+                                list.add(model);
                             }
                         }
                     }
